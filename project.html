@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>NeNasa Проекты</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">NeNasa</div>
+    <nav>
+        <a href="index.html">Главная</a>
+        <a href="AboutUs.html">О компании</a>
+        <a href="solar.html">Планеты</a>
+        <a href="project.html">Проекты</a>
+    </nav>
+</header>
+
+<canvas id="galaxy"></canvas>
+
+<div class="content">
+    <h1>Наши проекты</h1>
+    <p>NeNasa занимается исследованием космоса, астрономическими наблюдениями и разработкой уникальных проектов, чтобы изучать Вселенную.</p>
+
+    <div class="projects-grid">
+        <div class="project-card" data-budget="$80 000 000">
+            <div class="project-img" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/4/4a/XMM-Newton_spacecraft_model.png')"></div>
+            <h2>Космический телескоп</h2>
+            <p>Проект по запуску телескопа для изучения удалённых галактик и туманностей.</p>
+            <button class="details-btn">Подробнее</button>
+        </div>
+
+        <div class="project-card" data-budget="$12 000 000">
+            <div class="project-img" style="background-image:url('https://naked-science.ru/wp-content/uploads/2023/07/image-295.png')"></div>
+            <h2>Астрономическая база</h2>
+            <p>Создание наземной обсерватории для наблюдения за планетами и звёздами.</p>
+            <button class="details-btn">Подробнее</button>
+        </div>
+
+        <div class="project-card" data-budget="$4 500 000">
+            <div class="project-img" style="background-image:url('https://prodod.moscow/wp-content/uploads/2019/05/starry-night-1149815_640.jpg')"></div>
+            <h2>Образовательные программы</h2>
+            <p>Программы для школьников и студентов по астрономии и космонавтике.</p>
+            <button class="details-btn">Подробнее</button>
+        </div>
+
+        <div class="project-card" data-budget="$6 200 000">
+            <div class="project-img" style="background-image:url('https://m.misha.suvorkov.ru/gasplanet.png')"></div>
+            <h2>Исследование планет</h2>
+            <p>Проекты по наблюдению и анализу планет нашей Солнечной системы.</p>
+            <button class="details-btn">Подробнее</button>
+        </div>
+    </div>
+</div>
+
+<div class="project-details" id="projectDetails"></div>
+
+<footer>
+    Made by Akmulin Bulat and Zholshora Abbas
+</footer>
+
+<script src="galaxy.js"></script>
+<script src="project.js"></script>
+</body>
+</html>

@@ -1,0 +1,463 @@
+:root {
+  --bg1: #020311;
+  --muted: rgba(230,240,255,0.92);
+  --glass: rgba(255,255,255,0.03);
+  --accent1: linear-gradient(90deg,#7ad7ff,#ffcbf8);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: radial-gradient(1000px 500px at 10% 10%, #07112a 0%, #020311 40%, #000 100%);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  color: var(--muted);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+canvas {
+  position: fixed;
+  inset: 0;
+  display: block;
+  z-index: 1;
+}
+
+.topbar, header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 28px;
+  backdrop-filter: blur(6px);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  z-index: 80;
+  animation: fadeIn 1.5s forwards;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg,#7ad7ff,#ffffff,#ffcbf8);
+  -webkit-background-clip: text;
+  color: transparent;
+  transition: transform .25s ease, opacity .25s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+  opacity: .95;
+}
+
+.nav {
+  display: flex;
+  gap: 18px;
+}
+
+.nav a {
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  font-size: 15px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: all .18s ease;
+  position: relative;
+}
+
+.nav a::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg,#7ad7ff,#ffffff,#ffcbf8);
+  transition: 0.4s;
+}
+
+.nav a:hover::after {
+  width: 100%;
+}
+
+.nav a:hover {
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+.stage {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+#space {
+  position: fixed;
+  inset: 0;
+  display: block;
+  z-index: 1;
+}
+
+#space::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('https://i.ibb.co/7Yt6S5Q/stars.png') repeat;
+  background-size: cover;
+  animation: moveStars 120s linear infinite;
+  z-index: 0;
+}
+
+#ui, #orbits, #controls {
+  position: fixed;
+  inset: 0;
+  pointer-events: auto;
+}
+
+.planet-btn {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planet-btn .visual {
+  pointer-events: none;
+  border-radius: 50%;
+  display: block;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.planet-btn:focus {
+  box-shadow: 0 0 18px rgba(122,215,255,0.25);
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.planet-btn:hover .visual {
+  box-shadow: 0 0 25px rgba(122,215,255,0.3), 0 0 40px rgba(255,203,248,0.25);
+  transform: scale(1.08);
+}
+
+.orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.03);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: 18;
+  transition: opacity .6s ease, transform .6s ease, box-shadow .4s;
+  animation: slowRotate 30s linear infinite;
+}
+
+.orbit-ring.hidden { opacity: 0; }
+.orbit-ring.visible {
+  opacity: 1;
+  box-shadow: 0 0 28px rgba(122,215,255,0.02) inset;
+}
+
+#info {
+  position: fixed;
+  z-index: 70;
+  min-width: 220px;
+  max-width: 360px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(6px);
+  padding: 14px;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  transform-origin: top left;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .22s ease, transform .22s cubic-bezier(.2,.8,.2,1);
+  pointer-events: none;
+}
+
+#info[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
+#info[aria-hidden="true"] {
+  transform: scale(.98);
+}
+
+#infoClose {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#infoTitle {
+  margin: 6px 0 8px;
+  font-size: 18px;
+  background: var(--accent1);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+#infoDesc {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: rgba(230,240,255,0.95);
+  line-height: 1.4;
+}
+
+#infoFacts {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: rgba(210,225,240,0.95);
+}
+
+.planet-glow {
+  filter: blur(8px);
+  opacity: .9;
+  mix-blend-mode: screen;
+}
+
+.sun {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff89c 0%, #ffcb00 60%, #ff7f00 100%);
+  box-shadow: 0 0 80px #fff89c, 0 0 120px #ffcb00, 0 0 200px #ff7f00;
+  z-index: 10;
+  animation: sunPulse 5s ease-in-out infinite;
+}
+
+.content {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  animation: fadeIn 2s forwards;
+}
+
+h1 {
+  font-size: 64px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+  background: linear-gradient(90deg, #7ad7ff, #ffffff, #ffcbf8);
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: pulseText 3s infinite alternate;
+}
+
+h1:hover {
+  transform: scale(1.05);
+  text-shadow: 0 0 20px rgba(122, 215, 255, 0.7), 0 0 30px rgba(255, 203, 248, 0.6);
+}
+
+p {
+  font-size: 20px;
+  max-width: 600px;
+  opacity: 0.85;
+  margin-bottom: 40px;
+  animation: fadeInText 2s forwards 0.5s;
+}
+
+.btns {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.btns a {
+  text-decoration: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 18px;
+  color: white;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  transition: all 0.35s ease;
+  backdrop-filter: blur(4px);
+  position: relative;
+  overflow: hidden;
+}
+
+.btns a::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, #7ad7ff, #ffffff, #ffcbf8, #7ad7ff);
+  background-size: 400% 400%;
+  z-index: 0;
+  filter: blur(10px);
+  opacity: 0;
+  transition: 0.5s;
+}
+
+.btns a:hover::before {
+  opacity: 0.5;
+  animation: gradientMove 4s linear infinite;
+}
+
+.btns a:hover {
+  transform: scale(1.08) rotate(-1deg);
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.4);
+  box-shadow: 0 0 25px rgba(255,255,255,0.35), 0 0 40px rgba(122,215,255,0.25);
+}
+
+.btns a span {
+  position: relative;
+  z-index: 1;
+}
+
+footer {
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 1px;
+  z-index: 5;
+  text-shadow: 0 0 5px rgba(255,255,255,0.2);
+  pointer-events: none;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #000011, #000033);
+}
+
+#space {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+#space::before {
+  pointer-events: none;
+}
+
+#ui,
+#orbits {
+  pointer-events: none;
+}
+
+#controls {
+  pointer-events: auto;
+  z-index: 32; 
+}
+
+.planet-btn {
+  z-index: 33;
+  position: absolute; 
+}
+
+#info {
+  z-index: 100;
+  pointer-events: none; 
+}
+
+.sun,
+#space,
+canvas {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.planet-btn .visual {
+  pointer-events: none;
+}
+
+
+@keyframes pulseText {
+  0% { transform: scale(1); text-shadow: 0 0 5px rgba(255,255,255,0.2); }
+  50% { transform: scale(1.02); text-shadow: 0 0 15px rgba(255,255,255,0.6); }
+  100% { transform: scale(1); text-shadow: 0 0 5px rgba(255,255,255,0.2); }
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInText {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slowRotate {
+  from { transform: translate(-50%, -50%) rotate(0); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+@keyframes sunPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.05); }
+}
+
+@keyframes moveStars {
+  0% { transform: translate(0,0); }
+  100% { transform: translate(-1000px, 500px); }
+}
+
+@media (max-width:720px) {
+  #info { max-width: 92%; min-width: 200px; padding: 12px; }
+  .topbar { padding: 10px 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #info, .planet-btn, .nav a { transition: none; }
+}
