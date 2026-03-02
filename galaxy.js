@@ -1,227 +1,241 @@
-const c = document.getElementById("galaxy");
-const ctx = c.getContext("2d");
+const c = document.getElementById("galaxy"); // Ищет холст <canvas> по ID для рисования
+const ctx = c.getContext("2d"); // Получает инструменты рисования в 2D-пространстве
 
-let mx = -9999, my = -9999;
-let lastMove = Date.now();
-let W = 0, H = 0;
-let scale = 1;
-let targetScale = 1;
-const zoomSpeed = 0.001;
-const zoomSmooth = 0.12;
-let prevScale = 1;
-let zoomKick = 0;
+let mx = -9999,
+  my = -9999; // Координаты мыши, изначально установленные далеко за экраном
+let lastMove = Date.now(); // Фиксирует время последнего движения курсора
+let W = 0,
+  H = 0; // Переменные для хранения ширины и высоты окна
+let scale = 1; // Текущий коэффициент масштабирования (зума)
+let targetScale = 1; // Желаемый масштаб (для плавной анимации перехода)
+const zoomSpeed = 0.001; // Базовая скорость изменения масштаба
+const zoomSmooth = 0.12; // Коэффициент плавности сближения текущего масштаба с целевым
+let prevScale = 1; // Предыдущее значение масштаба для отслеживания резких изменений
+let zoomKick = 0; // "Импульс" скорости, возникающий при резком зумировании
 
 function resizeCanvas() {
-    const dpr = window.devicePixelRatio || 1;
-    c.width = window.innerWidth * dpr;
-    c.height = window.innerHeight * dpr;
-    c.style.width = window.innerWidth + "px";
-    c.style.height = window.innerHeight + "px";
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.scale(dpr, dpr);
-    W = window.innerWidth;
-    H = window.innerHeight;
+  // Функция для подгонки размера холста под размер окна браузера
+  const dpr = window.devicePixelRatio || 1; // Учитывает плотность пикселей экрана (для четкости на Retina)
+  c.width = window.innerWidth * dpr; // Устанавливает реальную ширину пикселей холста
+  c.height = window.innerHeight * dpr; // Устанавливает реальную высоту пикселей холста
+  c.style.width = window.innerWidth + "px"; // Устанавливает визуальную ширину через CSS
+  c.style.height = window.innerHeight + "px"; // Устанавливает визуальную высоту через CSS
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // Сбрасывает все предыдущие трансформации (поворот, масштаб)
+  ctx.scale(dpr, dpr); // Масштабирует систему координат под плотность пикселей
+  W = window.innerWidth; // Обновляет глобальную переменную ширины
+  H = window.innerHeight; // Обновляет глобальную переменную высоты
 }
 
-resizeCanvas();
-addEventListener("resize", resizeCanvas);
+resizeCanvas(); // Вызывает подстройку размера при загрузке страницы
+addEventListener("resize", resizeCanvas); // Пересчитывает размеры при каждом изменении окна пользователем
 
 if (window.visualViewport) {
-    visualViewport.addEventListener("resize", () => {
-        const s = visualViewport.scale || 1;
-        if (Math.abs(s - prevScale) > 0.001) {
-            scale = s;
-            zoomKick = 1;
-            prevScale = s;
-        }
-    });
+  // Если браузер поддерживает API визуального вьюпорта
+  visualViewport.addEventListener("resize", () => {
+    // Следит за зумом страницы (например, на мобильных)
+    const s = visualViewport.scale || 1; // Получает текущий масштаб вьюпорта
+    if (Math.abs(s - prevScale) > 0.001) {
+      // Если масштаб изменился больше чем на погрешность
+      scale = s; // Обновляет переменную масштаба
+      zoomKick = 1; // Создает визуальный толчок для частиц
+      prevScale = s; // Сохраняет новое значение масштаба
+    }
+  });
 }
 
-addEventListener("mousemove", e => {
-    mx = e.clientX;
-    my = e.clientY;
-    lastMove = Date.now();
+addEventListener("mousemove", (e) => {
+  // Слушает движение мыши по экрану
+  mx = e.clientX; // Запоминает позицию курсора по горизонтали
+  my = e.clientY; // Запоминает позицию курсора по вертикали
+  lastMove = Date.now(); // Обновляет метку времени последней активности
 });
 
-
-
-function r(a, b) { return a + Math.random() * (b - a); }
+function r(a, b) {
+  return a + Math.random() * (b - a);
+} // Вспомогательная функция для получения случайного числа от a до b
 
 class Star {
-    constructor() {
-        this.x = r(0, W);
-        this.y = r(0, H);
-        this.ox = this.x;
-        this.oy = this.y;
-        this.vx = 0;
-        this.vy = 0;
-        this.baseSize = r(1.5, 5);
-        this.size = this.baseSize;
-        this.color = `hsl(${r(0, 360)},80%,75%)`;
-        this.pulse = r(0, Math.PI * 2);
-        this.depth = r(0.6, 1.4);
+  // Класс, описывающий поведение и вид отдельной звезды
+  constructor() {
+    // Метод создания новой звезды
+    this.x = r(0, W); // Случайная координата X на экране
+    this.y = r(0, H); // Случайная координата Y на экране
+    this.ox = this.x; // Сохраняет изначальную (родную) координату X
+    this.oy = this.y; // Сохраняет изначальную (родную) координату Y
+    this.vx = 0; // Текущая скорость перемещения по X
+    this.vy = 0; // Текущая скорость перемещения по Y
+    this.baseSize = r(1.5, 5); // Случайный базовый размер (радиус) звезды
+    this.size = this.baseSize; // Текущий размер, который может меняться (пульсировать)
+    this.color = `hsl(${r(0, 360)},80%,75%)`; // Случайный яркий цвет в формате HSL
+    this.pulse = r(0, Math.PI * 2); // Начальная фаза пульсации (чтобы звезды мерцали несинхронно)
+    this.depth = r(0.6, 1.4); // Коэффициент глубины для создания эффекта параллакса
+  }
+  update(arr) {
+    // Обновляет физику звезды в каждом кадре
+    let inactive = Date.now() - lastMove > 1500; // Проверяет, не двигалась ли мышь последние 1.5 секунды
+    let dxm = this.x - mx; // Расстояние до курсора мыши по X
+    let dym = this.y - my; // Расстояние до курсора мыши по Y
+    let dm = Math.sqrt(dxm * dxm + dym * dym); // Общее расстояние до мыши (теорема Пифагора)
+
+    if (!inactive && dm < 150) {
+      // Если мышь близко и она активна
+      let f = (150 - dm) * 0.03 * this.depth; // Сила отталкивания звезды от курсора
+      this.vx += (dxm / dm) * f; // Добавляет ускорение по X (убегание от мыши)
+      this.vy += (dym / dm) * f; // Добавляет ускорение по Y
     }
-    update(arr) {
-        let inactive = Date.now() - lastMove > 1500;
-        let dxm = this.x - mx;
-        let dym = this.y - my;
-        let dm = Math.sqrt(dxm * dxm + dym * dym);
 
-        if (!inactive && dm < 150) {
-            let f = (150 - dm) * 0.03 * this.depth;
-            this.vx += dxm / dm * f;
-            this.vy += dym / dm * f;
-        }
-
-        let dx0 = this.ox * scale - this.x;
-        let dy0 = this.oy * scale - this.y;
-        let d0 = Math.sqrt(dx0 * dx0 + dy0 * dy0);
-        let pull = 0.01;
-        if (zoomKick > 0) pull += zoomKick * 0.15;
-        let f0 = pull * d0 * this.depth;
-        if (d0 > 1) {
-            this.vx += dx0 / d0 * f0;
-            this.vy += dy0 / d0 * f0;
-        }
-
-        for (let p of arr) {
-            if (p === this) continue;
-            let dx = p.x - this.x;
-            let dy = p.y - this.y;
-            let d = Math.sqrt(dx * dx + dy * dy);
-            let minD = this.size + p.size;
-            if (d < minD && d > 0) {
-                let overlap = (minD - d) * 0.015;
-                let fx = dx / d * overlap;
-                let fy = dy / d * overlap;
-                this.vx -= fx;
-                this.vy -= fy;
-                p.vx += fx;
-                p.vy += fy;
-            }
-        }
-
-        this.vx *= 0.92;
-        this.vy *= 0.92;
-        this.x += this.vx;
-        this.y += this.vy;
-        this.size = this.baseSize + Math.sin(Date.now() * 0.005 + this.pulse) * 0.5;
+    let dx0 = this.ox * scale - this.x; // Расстояние от текущей позиции до "родной" с учетом зума по X
+    let dy0 = this.oy * scale - this.y; // Расстояние до "родной" позиции по Y
+    let d0 = Math.sqrt(dx0 * dx0 + dy0 * dy0); // Расстояние до точки возврата
+    let pull = 0.01; // Базовая сила возвращения звезды на место
+    if (zoomKick > 0) pull += zoomKick * 0.15; // Усиливает тягу, если происходит резкий зум
+    let f0 = pull * d0 * this.depth; // Итоговая сила притяжения к исходной точке
+    if (d0 > 1) {
+      // Если звезда сместилась хотя бы на 1 пиксель
+      this.vx += (dx0 / d0) * f0; // Тянет звезду обратно по X
+      this.vy += (dy0 / d0) * f0; // Тянет звезду обратно по Y
     }
-    draw() {
-        ctx.beginPath();
-        ctx.fillStyle = this.color;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = this.color;
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
+
+    for (let p of arr) {
+      // Проверка столкновений с другими частицами (звездами)
+      if (p === this) continue; // Не сравнивает звезду саму с собой
+      let dx = p.x - this.x; // Расстояние между центрами звезд по X
+      let dy = p.y - this.y; // Расстояние между центрами звезд по Y
+      let d = Math.sqrt(dx * dx + dy * dy); // Общее расстояние между звездами
+      let minD = this.size + p.size; // Минимальная дистанция (сумма радиусов)
+      if (d < minD && d > 0) {
+        // Если звезды накладываются друг на друга
+        let overlap = (minD - d) * 0.015; // Рассчитывает силу расталкивания
+        let fx = (dx / d) * overlap; // Проекция силы на ось X
+        let fy = (dy / d) * overlap; // Проекция силы на ось Y
+        this.vx -= fx; // Толкает текущую звезду назад
+        this.vy -= fy; // ...
+        p.vx += fx; // Толкает встречную звезду вперед
+        p.vy += fy; // ...
+      }
     }
+
+    this.vx *= 0.92; // Инерция: снижает скорость (сопротивление среды) по X
+    this.vy *= 0.92; // Инерция: снижает скорость по Y
+    this.x += this.vx; // Изменяет координату X на величину текущей скорости
+    this.y += this.vy; // Изменяет координату Y на величину текущей скорости
+    this.size = this.baseSize + Math.sin(Date.now() * 0.005 + this.pulse) * 0.5; // Анимирует мерцание через синус
+  }
+  draw() {
+    // Рисует звезду на холсте
+    ctx.beginPath(); // Начинает рисование новой геометрической фигуры
+    ctx.fillStyle = this.color; // Устанавливает цвет заливки звезды
+    ctx.shadowBlur = 10; // Задает радиус размытия тени (эффект свечения)
+    ctx.shadowColor = this.color; // Цвет свечения совпадает с цветом звезды
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); // Рисует круглую форму звезды
+    ctx.fill(); // Закрашивает круг установленным цветом
+    ctx.shadowBlur = 0; // Сбрасывает свечение, чтобы оно не влияло на другие объекты
+  }
 }
 
 class Nebula {
-    constructor() {
-        this.x = r(0, W);
-        this.y = r(0, H);
-        this.radius = r(200, 400);
-        this.color = `hsla(${r(180, 280)},60%,50%,0.1)`;
-        this.angle = r(0, Math.PI * 2);
-        this.speed = r(0.0001, 0.0003);
-    }
-    update() {
-        this.angle += this.speed;
-        this.x += Math.cos(this.angle) * 0.05;
-        this.y += Math.sin(this.angle) * 0.05;
-    }
-    draw() {
-        let g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
-        g.addColorStop(0, this.color);
-        g.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-    }
+  // Класс для создания фоновых туманностей
+  constructor() {
+    // Инициализация свойств туманности
+    this.x = r(0, W); // Позиция по горизонтали
+    this.y = r(0, H); // Позиция по вертикали
+    this.r = r(150, 450); // Большой радиус пятна туманности
+    this.color = `hsla(${r(200, 300)}, 70%, 50%, 0.04)`; // Очень прозрачный цвет (сине-фиолетовый)
+  }
+  draw() {
+    // Рисует туманность
+    let g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r); // Создает градиент от центра к краям
+    g.addColorStop(0, this.color); // В центре — установленный цвет
+    g.addColorStop(1, "transparent"); // К краям — полная прозрачность
+    ctx.fillStyle = g; // Использует градиент как цвет заливки
+    ctx.fillRect(0, 0, W, H); // Заполняет область (эффект мягкого пятна)
+  }
 }
 
 class Dust {
-    constructor() {
-        this.x = r(0, W);
-        this.y = r(0, H);
-        this.size = r(0.5, 1.5);
-        this.sx = r(-0.05, 0.05);
-        this.sy = r(-0.05, 0.05);
-        this.color = 'rgba(255,255,255,' + r(0.1, 0.4) + ')';
-    }
-    update() {
-        this.x += this.sx;
-        this.y += this.sy;
-        if (this.x < 0 || this.x > W) this.sx *= -1;
-        if (this.y < 0 || this.y > H) this.sy *= -1;
-    }
-    draw() {
-        ctx.beginPath();
-        ctx.fillStyle = this.color;
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-    }
+  // Класс для мелкой космической пыли
+  constructor() {
+    // Настройка свойств пылинки
+    this.x = r(0, W); // Координата X
+    this.y = r(0, H); // Координата Y
+    this.size = r(0.5, 1.2); // Очень маленький размер
+    this.alpha = r(0.1, 0.4); // Полупрозрачность
+  }
+  draw() {
+    // Рисует пылинку
+    ctx.fillStyle = `rgba(255,255,255,${this.alpha})`; // Белый цвет с заданной прозрачностью
+    ctx.fillRect(this.x, this.y, this.size, this.size); // Рисует крошечный квадрат (пиксель пыли)
+  }
 }
 
 class Meteor {
-    constructor() {
-        this.x = r(-200, W + 200);
-        this.y = r(-200, -50);
-        this.len = r(80, 150);
-        this.speed = r(8, 15);
-        this.angle = r(1.1, 1.4);
-        this.vx = Math.cos(this.angle) * this.speed;
-        this.vy = Math.sin(this.angle) * this.speed;
-        this.alpha = r(0.4, 0.8);
-    }
-    update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.alpha *= 0.985;
-        if (this.y > H + 200) this.dead = true;
-    }
-    draw() {
-        ctx.strokeStyle = `rgba(255,255,255,${this.alpha})`;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.x - this.vx * 3, this.y - this.vy * 3);
-        ctx.stroke();
-    }
+  // Класс для падающих метеоров
+  constructor() {
+    // Параметры метеора
+    this.x = r(-100, W); // Начальная позиция (может быть за левым краем)
+    this.y = r(-100, 0); // Появляется сверху за пределами экрана
+    this.speed = r(8, 15); // Высокая скорость падения
+    this.angle = r(0.5, 1); // Угол падения (наискосок вниз)
+    this.len = r(1.1, 1.4); // Коэффициент длины хвоста
+    this.vx = Math.cos(this.angle) * this.speed; // Горизонтальная составляющая скорости
+    this.vy = Math.sin(this.angle) * this.speed; // Вертикальная составляющая скорости
+    this.alpha = r(0.4, 0.8); // Начальная яркость
+  }
+  update() {
+    // Обновляет позицию метеора
+    this.x += this.vx; // Двигает по X
+    this.y += this.vy; // Двигает по Y
+    this.alpha *= 0.985; // Постепенно затухает (исчезает)
+    if (this.y > H + 200) this.dead = true; // Помечает для удаления, если улетел за экран
+  }
+  draw() {
+    // Рисует "хвост" метеора
+    ctx.strokeStyle = `rgba(255,255,255,${this.alpha})`; // Цвет линии метеора
+    ctx.lineWidth = 2; // Толщина линии
+    ctx.beginPath(); // Начало пути
+    ctx.moveTo(this.x, this.y); // Точка головы метеора
+    ctx.lineTo(this.x - this.vx * 3, this.y - this.vy * 3); // Рисует линию в обратную сторону движения
+    ctx.stroke(); // Отрисовывает линию
+  }
 }
 
-const stars = [];
-for (let i = 0; i < 350; i++) stars.push(new Star());
-const nebulas = [];
-for (let i = 0; i < 3; i++) nebulas.push(new Nebula());
-const dusts = [];
-for (let i = 0; i < 200; i++) dusts.push(new Dust());
-let meteors = [];
+const stars = []; // Массив для хранения всех звезд
+for (let i = 0; i < 350; i++) stars.push(new Star()); // Создает 350 объектов звезд
+const nebulas = []; // Массив для туманностей
+for (let i = 0; i < 3; i++) nebulas.push(new Nebula()); // Создает 3 туманности
+const dusts = []; // Массив для пыли
+for (let i = 0; i < 200; i++) dusts.push(new Dust()); // Создает 200 частиц пыли
+let meteors = []; // Массив для метеоров (пустой, так как они появляются редко)
 
 function loop() {
-    const hour = new Date().getHours();
-    let bg = '0,0,0';
-    if (hour >= 6 && hour < 18) bg = '10,10,30';
-    else if (hour >= 18 && hour < 22) bg = '5,0,20';
+  // Главный цикл анимации (выполняется ~60 раз в секунду)
+  const hour = new Date().getHours(); // Получает текущий час для смены цветовой гаммы
+  let bg = "#020308"; // Темный ночной фон по умолчанию
+  if (hour > 6 && hour < 18) bg = "#050815"; // Чуть более светлый фон в дневное время
+  ctx.fillStyle = bg; // Устанавливает цвет фона
+  ctx.fillRect(0, 0, W, H); // Очищает весь холст перед рисованием нового кадра
 
-    ctx.fillStyle = `rgba(${bg},0.25)`;
-    ctx.fillRect(0, 0, W, H);
+  if (zoomKick > 0) zoomKick *= 0.95; // Постепенно гасит импульс зума
 
-    nebulas.forEach(n => { n.update(); n.draw(); });
-    stars.forEach(s => { s.update(stars); s.draw(); });
-    dusts.forEach(d => { d.update(); d.draw(); });
+  nebulas.forEach((n) => n.draw()); // Рисует все туманности на заднем слое
+  dusts.forEach((d) => d.draw()); // Рисует космическую пыль
 
-    if (Math.random() < 0.004) meteors.push(new Meteor());
+  stars.forEach((s) => {
+    // Для каждой звезды в массиве
+    s.update(stars); // Рассчитывает новую физику (движение, отталкивание)
+    s.draw(); // Выводит звезду на экран
+  });
 
-    meteors.forEach(m => { m.update(); m.draw(); });
-    meteors = meteors.filter(m => !m.dead);
+  if (Math.random() < 0.015) meteors.push(new Meteor()); // С малым шансом создает новый метеор в кадре
+  meteors = meteors.filter((m) => !m.dead); // Удаляет те метеоры, которые улетели или затухли
+  meteors.forEach((m) => {
+    // Для каждого активного метеора
+    m.update(); // Двигает его
+    m.draw(); // Рисует его след
+  });
 
-    zoomKick *= 0.9;
-
-    requestAnimationFrame(loop);
+  requestAnimationFrame(loop); // Просит браузер вызвать эту же функцию снова для следующего кадра
 }
 
-loop();
+loop(); // Запускает бесконечный цикл анимации
+

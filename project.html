@@ -1,67 +1,146 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-<meta charset="UTF-8">
-<title>Io Проекты</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<header>
-    <div class="logo">Io</div>
-    <nav>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Io Проекты</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo">Io</div>
+      <nav>
         <a href="index.html">Главная</a>
         <a href="AboutUs.html">О компании</a>
         <a href="solar.html">Планеты</a>
         <a href="project.html">Проекты</a>
-    </nav>
-</header>
+      </nav>
+    </header>
 
-<canvas id="galaxy"></canvas>
+    <canvas id="galaxy"></canvas>
 
-<div class="content">
-    <h1>Наши проекты</h1>
-    <p>NeNasa занимается исследованием космоса, астрономическими наблюдениями и разработкой уникальных проектов, чтобы изучать Вселенную.</p>
+    <div class="content">
+      <h1>Наши проекты</h1>
+      <p>
+        Io занимается исследованием космоса, астрономическими наблюдениями и
+        разработкой уникальных проектов, чтобы изучать Вселенную.
+      </p>
 
-    <div class="projects-grid">
+      <div class="projects-grid">
         <div class="project-card" data-budget="$80 000 000">
-            <div class="project-img" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/4/4a/XMM-Newton_spacecraft_model.png')"></div>
-            <h2>Космический телескоп</h2>
-            <p>Проект по запуску телескопа для изучения удалённых галактик и туманностей.</p>
-            <button class="details-btn">Подробнее</button>
+          <div
+            class="project-img"
+            style="
+              background-image: url(&quot;https://upload.wikimedia.org/wikipedia/commons/4/4a/XMM-Newton_spacecraft_model.png&quot;);
+            "
+          ></div>
+          <h2>Космический телескоп</h2>
+          <p>
+            Проект по запуску телескопа для изучения удалённых галактик и
+            туманностей.
+          </p>
+          <button class="details-btn">Подробнее</button>
         </div>
 
         <div class="project-card" data-budget="$12 000 000">
-            <div class="project-img" style="background-image:url('https://naked-science.ru/wp-content/uploads/2023/07/image-295.png')"></div>
-            <h2>Астрономическая база</h2>
-            <p>Создание наземной обсерватории для наблюдения за планетами и звёздами.</p>
-            <button class="details-btn">Подробнее</button>
+          <div
+            class="project-img"
+            style="
+              background-image: url(&quot;https://naked-science.ru/wp-content/uploads/2023/07/image-295.png&quot;);
+            "
+          ></div>
+          <h2>Астрономическая база</h2>
+          <p>
+            Создание наземной обсерватории для наблюдения за планетами и
+            звёздами.
+          </p>
+          <button class="details-btn">Подробнее</button>
         </div>
 
         <div class="project-card" data-budget="$4 500 000">
-            <div class="project-img" style="background-image:url('https://prodod.moscow/wp-content/uploads/2019/05/starry-night-1149815_640.jpg')"></div>
-            <h2>Образовательные программы</h2>
-            <p>Программы для школьников и студентов по астрономии и космонавтике.</p>
-            <button class="details-btn">Подробнее</button>
+          <div
+            class="project-img"
+            style="
+              background-image: url(&quot;https://prodod.moscow/wp-content/uploads/2019/05/starry-night-1149815_640.jpg&quot;);
+            "
+          ></div>
+          <h2>Образовательные программы</h2>
+          <p>
+            Программы для школьников и студентов по астрономии и космонавтике.
+          </p>
+          <button class="details-btn">Подробнее</button>
         </div>
 
         <div class="project-card" data-budget="$6 200 000">
-            <div class="project-img" style="background-image:url('https://m.misha.suvorkov.ru/gasplanet.png')"></div>
-            <h2>Исследование планет</h2>
-            <p>Проекты по наблюдению и анализу планет нашей Солнечной системы.</p>
-            <button class="details-btn">Подробнее</button>
+          <div
+            class="project-img"
+            style="
+              background-image: url(&quot;https://m.misha.suvorkov.ru/gasplanet.png&quot;);
+            "
+          ></div>
+          <h2>Исследование планет</h2>
+          <p>Проекты по наблюдению и анализу планет нашей Солнечной системы.</p>
+          <button class="details-btn">Подробнее</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-details" id="projectDetails"></div>
+
+<section class="budget-section">
+    <h2 class="gallery-title">Сметы проектов</h2>
+    
+    <div class="table-container">
+        <table class="glass-table">
+            <thead>
+                <tr>
+                    <th>Название модуля</th>
+                    <th>Стоимость (USD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Космический телескоп "io-Vision"</td>
+                    <td>$80,000,000</td>
+                </tr>
+                <tr>
+                    <td>Астрономическая база "Alpha"</td>
+                    <td>$12,000,000</td>
+                </tr>
+                <tr>
+                    <td>Образовательные программы</td>
+                    <td>$4,500,000</td>
+                </tr>
+                <tr>
+                    <td>Исследование планет</td>
+                    <td>$6,200,000</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="video-trigger-wrapper">
+        <button id="showVideoBtn" class="white-btn">Смотреть презентацию</button>
+    </div>
+</section>
+
+<div id="videoModal" class="project-details" style="display:none;">
+    <button class="pd-close" id="closeVideo">✕</button>
+    <div class="pd-inner" style="max-width: 1250px;">
+        <div class="video-content-block">
+            <video id="mainVideo" width="1200" height="600" muted loop controls playsinline class="main-video">
+                <source src="" type="video/mp4">
+            </video>
+            <div class="pd-right">
+                <h2>Визуализация миссии</h2>
+                <p class="pd-lead">Демонстрация работы систем в условиях глубокого космоса.</p>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="project-details" id="projectDetails"></div>
+    <footer>Made by Beka</footer>
 
-<footer>
-    Made by Beka
-</footer>
-
-<script src="galaxy.js"></script>
-<script src="project.js"></script>
-</body>
+    <script src="galaxy.js"></script>
+    <script src="project.js"></script>
+  </body>
 </html>

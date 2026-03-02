@@ -5,6 +5,11 @@ html, body {
     background: black;
     height: 100%;
     font-family: "Segoe UI", Arial, sans-serif;
+    scroll-behavior: smooth;
+}
+
+body.no-scroll {
+    overflow: hidden !important;
 }
 
 canvas {
@@ -30,7 +35,7 @@ canvas {
     letter-spacing: 4px;
     margin: 0;
     background: linear-gradient(90deg, #7ad7ff, #ffffff, #ffcbf8);
-    -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
     animation: pulseText 3s infinite alternate;
 }
